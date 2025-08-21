@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/6afb98c8-7f48-4d5f-94d1-3d12329ab7cc/deploy-status)](https://app.netlify.com/projects/jiawialo/deploys)
+
 # Social Media Link Sharing Website
 
 Website sederhana untuk membagikan link sosial media dengan tampilan modern, profil, bio, dan fitur copy link.
