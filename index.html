@@ -5,41 +5,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Share Link Sosial Media</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/jpeg" href="529156440_122125344008910630_3893160631968165673_n.jpg">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <div class="container">
-        <div class="profile">
-            <img src="529156440_122125344008910630_3893160631968165673_n.jpg" alt="Jia Wialo" class="profile-img">
-            <h1 class="name">Jia Wialo</h1>
-            <p class="desc">Douyin Subtitle Indonesia<br>
-                Berbagi video, subtitle, dan info menarik seputar Douyin & budaya Tiongkok. Temukan konten terbaru!<br>
-                Follow semua sosial media untuk update dan kolaborasi.</p>
+<body class="bg-gradient-to-br from-cyan-100 to-blue-200 min-h-screen flex items-center justify-center py-8 relative">
+    <!-- Loader Progress Bar -->
+    <div id="loader-bar"
+        class="fixed top-0 left-0 w-0 h-1.5 bg-gradient-to-r from-cyan-400 to-pink-400 z-50 transition-all duration-700">
+    </div>
+    <div id="main-content"
+        class="w-full max-w-md mx-auto bg-white/90 rounded-2xl shadow-2xl p-6 opacity-0 transition-opacity duration-300">
+        <div class="flex flex-col items-center mb-6">
+            <img src="529156440_122125344008910630_3893160631968165673_n.jpg" alt="Jia Wialo"
+                class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md mb-3">
+            <h1 class="text-2xl font-bold text-gray-800">Jia Wialo</h1>
+            <p class="text-gray-600 text-center mt-2 text-base leading-relaxed">Douyin Subtitle Indonesia<br>Berbagi
+                video, subtitle, dan info menarik seputar Douyin & budaya Tiongkok. Temukan konten terbaru!<br>Follow
+                semua sosial media untuk update dan kolaborasi.</p>
         </div>
-        <div class="links">
+        <div class="flex flex-col gap-5 mb-6">
             <a href="https://www.tiktok.com/@jia_wialo?fbclid=IwY2xjawMTfhtleHRuA2FlbQIxMABicmlkETFwZlhVTkwxY1lNNTlqcmpwAR4ylBJAxl-2f2e_Fvvdczos3_DpTZc96wrvPJH056WRXYD3GTCBGY3BFCq6IA_aem_DFRp54al7eIKGXcGWEbxMA"
-                target="_blank" class="social-link tiktok">
-                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg" alt="TikTok"
-                    class="icon-social"> TikTok
+                target="_blank"
+                class="flex items-center justify-between px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-cyan-400 to-pink-400 shadow-md hover:scale-[1.03] transition-transform"
+                onclick="countClick('tiktok')">
+                <span class="flex items-center gap-3"><img
+                        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg" alt="TikTok"
+                        class="w-7 h-7"> TikTok</span>
+                <span class="bg-white text-gray-800 font-bold rounded-full px-5 py-1 min-w-[36px] text-center shadow"
+                    id="count-tiktok">0</span>
             </a>
             <a href="https://www.instagram.com/jia_wialo?fbclid=IwY2xjawMTfPJleHRuA2FlbQIxMABicmlkETFwZlhVTkwxY1lNNTlqcmpwAR5ObA3oDriYaV4xk-Nk4G_qUosLbz24To26lzTqQq_mQtG83EpYr3gLnDfVdQ_aem_PeOO34-LD6DNiri1yJnGvA"
-                target="_blank" class="social-link instagram">
-                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram"
-                    class="icon-social"> Instagram
+                target="_blank"
+                class="flex items-center justify-between px-6 py-4 rounded-xl font-semibold text-white bg-pink-500 shadow-md hover:scale-[1.03] transition-transform"
+                onclick="countClick('instagram')">
+                <span class="flex items-center gap-3"><img
+                        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram"
+                        class="w-7 h-7"> Instagram</span>
+                <span class="bg-white text-gray-800 font-bold rounded-full px-5 py-1 min-w-[36px] text-center shadow"
+                    id="count-instagram">0</span>
             </a>
-            <a href="https://facebook.com/profile.php?id=61577318921785" target="_blank" class="social-link facebook">
-                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook"
-                    class="icon-social"> Facebook
+            <a href="https://facebook.com/profile.php?id=61577318921785" target="_blank"
+                class="flex items-center justify-between px-6 py-4 rounded-xl font-semibold text-white bg-blue-600 shadow-md hover:scale-[1.03] transition-transform"
+                onclick="countClick('facebook')">
+                <span class="flex items-center gap-3"><img
+                        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook"
+                        class="w-7 h-7"> Facebook</span>
+                <span class="bg-white text-gray-800 font-bold rounded-full px-5 py-1 min-w-[36px] text-center shadow"
+                    id="count-facebook">0</span>
             </a>
-            <a href="mailto:jiawialo@gmail.com" target="_blank" class="social-link gmail">
-                <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg" alt="Gmail"
-                    class="icon-social"> Gmail
+            <a href="mailto:jiawialo@gmail.com" target="_blank"
+                class="flex items-center justify-between px-6 py-4 rounded-xl font-semibold text-white bg-red-500 shadow-md hover:scale-[1.03] transition-transform"
+                onclick="countClick('gmail')">
+                <span class="flex items-center gap-3"><img
+                        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg" alt="Gmail"
+                        class="w-7 h-7"> Gmail</span>
+                <span class="bg-white text-gray-800 font-bold rounded-full px-5 py-1 min-w-[36px] text-center shadow"
+                    id="count-gmail">0</span>
             </a>
         </div>
-        <div class="digital-clock" id="digitalClock"></div>
+        <div class="w-full flex justify-center">
+            <div class="digital-clock text-lg font-mono font-bold text-blue-600 bg-blue-100 rounded-lg px-6 py-2 shadow-inner"
+                id="digitalClock"></div>
+        </div>
     </div>
     <script src="script.js"></script>
+    <script>
+        // Progress bar loader
+        const loaderBar = document.getElementById('loader-bar');
+        const mainContent = document.getElementById('main-content');
+        let progress = 0;
+        function animateLoader() {
+            progress += Math.random() * 20 + 10;
+            if (progress < 100) {
+                loaderBar.style.width = progress + '%';
+                setTimeout(animateLoader, 180);
+            } else {
+                loaderBar.style.width = '100%';
+                setTimeout(() => {
+                    loaderBar.style.opacity = '0';
+                    mainContent.style.opacity = '1';
+                }, 350);
+            }
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            loaderBar.style.width = '0';
+            loaderBar.style.opacity = '1';
+            mainContent.style.opacity = '0';
+            setTimeout(() => animateLoader(), 120);
+        });
+    </script>
 </body>
 
 </html>

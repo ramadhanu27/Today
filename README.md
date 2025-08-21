@@ -2,17 +2,19 @@
 
 # Social Media Link Sharing Website
 
-Website sederhana untuk membagikan link sosial media dengan tampilan modern, profil, bio, dan fitur copy link.
+Website modern untuk membagikan link sosial media dengan tampilan profesional, statistik klik, dan animasi interaktif.
 
 ## Fitur
 
+- Desain modern dengan Tailwind CSS
 - Profil dengan foto dan bio
-- Daftar link sosial media (TikTok, Instagram, Facebook)
+- Daftar link sosial media (TikTok, Instagram, Facebook, Gmail)
 - Logo sosial media pada setiap link
-- Tombol "Copy" untuk menyalin link ke clipboard
-- Animasi hover pada tombol sosial media
-- Bagian "About Me" di bawah bio
+- Statistik jumlah klik pada setiap link (tersimpan di browser)
+- Loader/progress bar animasi saat halaman dibuka
+- Animasi hover dan transisi pada tombol sosial media
 - Responsive dan mudah dikustomisasi
+- Jam digital real-time
 
 ## Cara Menggunakan
 
@@ -23,11 +25,11 @@ Website sederhana untuk membagikan link sosial media dengan tampilan modern, pro
 
 ## Struktur File
 
-- `index.html` — Halaman utama website
-- `style.css` — File CSS untuk styling
-- `script.js` — (Opsional) File JavaScript tambahan
+- `index.html` — Halaman utama website (menggunakan Tailwind CSS CDN)
+- `script.js` — File JavaScript tambahan (statistik klik, jam digital)
 - `README.md` — Dokumentasi proyek
 - `529156440_122125344008910630_3893160631968165673_n.jpg` — Foto profil (bisa diganti)
+- `bg.jpg` — Background (bisa diganti)
 
 ## Lisensi
 
