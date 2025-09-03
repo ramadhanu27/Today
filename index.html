@@ -7,6 +7,8 @@
     <title>Share Link Sosial Media</title>
     <link rel="icon" type="image/jpeg" href="529156440_122125344008910630_3893160631968165673_n.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="stats.css">
 </head>
 
 <body class="bg-gradient-to-br from-cyan-100 to-blue-200 min-h-screen flex items-center justify-center py-8 relative">
@@ -27,46 +29,104 @@
         <div class="flex flex-col gap-5 mb-6">
             <a href="https://www.tiktok.com/@jia_wialo?fbclid=IwY2xjawMTfhtleHRuA2FlbQIxMABicmlkETFwZlhVTkwxY1lNNTlqcmpwAR4ylBJAxl-2f2e_Fvvdczos3_DpTZc96wrvPJH056WRXYD3GTCBGY3BFCq6IA_aem_DFRp54al7eIKGXcGWEbxMA"
                 target="_blank"
-                class="flex items-center justify-between px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-cyan-400 to-pink-400 shadow-md hover:scale-[1.03] transition-transform"
-                onclick="countClick('tiktok')">
+                class="flex items-center px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-cyan-400 to-pink-400 shadow-md hover:scale-[1.03] transition-transform">
                 <span class="flex items-center gap-3"><img
                         src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg" alt="TikTok"
                         class="w-7 h-7"> TikTok</span>
-                <span class="bg-white text-gray-800 font-bold rounded-full px-5 py-1 min-w-[36px] text-center shadow"
-                    id="count-tiktok">0</span>
             </a>
             <a href="https://www.instagram.com/jia_wialo?fbclid=IwY2xjawMTfPJleHRuA2FlbQIxMABicmlkETFwZlhVTkwxY1lNNTlqcmpwAR5ObA3oDriYaV4xk-Nk4G_qUosLbz24To26lzTqQq_mQtG83EpYr3gLnDfVdQ_aem_PeOO34-LD6DNiri1yJnGvA"
                 target="_blank"
-                class="flex items-center justify-between px-6 py-4 rounded-xl font-semibold text-white bg-pink-500 shadow-md hover:scale-[1.03] transition-transform"
-                onclick="countClick('instagram')">
+                class="flex items-center px-6 py-4 rounded-xl font-semibold text-white bg-pink-500 shadow-md hover:scale-[1.03] transition-transform">
                 <span class="flex items-center gap-3"><img
                         src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram"
                         class="w-7 h-7"> Instagram</span>
-                <span class="bg-white text-gray-800 font-bold rounded-full px-5 py-1 min-w-[36px] text-center shadow"
-                    id="count-instagram">0</span>
             </a>
             <a href="https://facebook.com/profile.php?id=61577318921785" target="_blank"
-                class="flex items-center justify-between px-6 py-4 rounded-xl font-semibold text-white bg-blue-600 shadow-md hover:scale-[1.03] transition-transform"
-                onclick="countClick('facebook')">
+                class="flex items-center px-6 py-4 rounded-xl font-semibold text-white bg-blue-600 shadow-md hover:scale-[1.03] transition-transform">
                 <span class="flex items-center gap-3"><img
                         src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook"
                         class="w-7 h-7"> Facebook</span>
-                <span class="bg-white text-gray-800 font-bold rounded-full px-5 py-1 min-w-[36px] text-center shadow"
-                    id="count-facebook">0</span>
             </a>
             <a href="mailto:jiawialo@gmail.com" target="_blank"
-                class="flex items-center justify-between px-6 py-4 rounded-xl font-semibold text-white bg-red-500 shadow-md hover:scale-[1.03] transition-transform"
-                onclick="countClick('gmail')">
+                class="flex items-center px-6 py-4 rounded-xl font-semibold text-white bg-red-500 shadow-md hover:scale-[1.03] transition-transform">
                 <span class="flex items-center gap-3"><img
                         src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg" alt="Gmail"
                         class="w-7 h-7"> Gmail</span>
-                <span class="bg-white text-gray-800 font-bold rounded-full px-5 py-1 min-w-[36px] text-center shadow"
-                    id="count-gmail">0</span>
             </a>
         </div>
-        <div class="w-full flex justify-center">
+        <div class="w-full flex flex-col items-center gap-4">
             <div class="digital-clock text-lg font-mono font-bold text-blue-600 bg-blue-100 rounded-lg px-6 py-2 shadow-inner"
                 id="digitalClock"></div>
+            <div class="visitor-stats flex items-center gap-2 text-gray-600">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a6 6 0 100-12 6 6 0 000 12zM3.6 15.8a8 8 0 1112.8 0 12 12 0 00-12.8 0z" />
+                </svg>
+                <span class="text-sm">Total Pengunjung:</span>
+                <span id="visitorCount" class="font-bold text-blue-600">0</span>
+            </div>
+            
+            <!-- Tombol untuk membuka statistik -->
+            <button id="statsToggleBtn" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                Lihat Statistik Pengunjung
+            </button>
+        </div>
+        
+        <!-- Modal Statistik Pengunjung -->
+        <div id="statsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-3xl max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Statistik Pengunjung</h2>
+                    <button id="closeStatsBtn" class="text-gray-500 hover:text-gray-800">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-700 mb-2">Total Pengunjung</h3>
+                        <p id="totalVisitors" class="text-3xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-700 mb-2">Durasi Rata-rata</h3>
+                        <p id="avgDuration" class="text-3xl font-bold text-green-600">0 menit</p>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-semibold text-gray-700 mb-3">Tren Kunjungan</h3>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <div class="flex mb-3">
+                            <button class="trend-btn px-3 py-1 rounded-lg bg-blue-500 text-white mr-2" data-period="daily">Harian</button>
+                            <button class="trend-btn px-3 py-1 rounded-lg bg-gray-200 text-gray-700 mr-2" data-period="weekly">Mingguan</button>
+                            <button class="trend-btn px-3 py-1 rounded-lg bg-gray-200 text-gray-700" data-period="monthly">Bulanan</button>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="visitorTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-3">Halaman Populer</h3>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <div class="h-48">
+                                <canvas id="popularPagesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-3">Sumber Traffic</h3>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <div class="h-48">
+                                <canvas id="trafficSourceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
