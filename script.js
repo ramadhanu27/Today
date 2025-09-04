@@ -1,3 +1,143 @@
+// Inisialisasi Dark Mode
+function initDarkMode() {
+    // Cek preferensi tema dari localStorage
+    let darkModePreference = localStorage.getItem('darkModePreference') || 'system';
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    
+    // Fungsi untuk mendeteksi preferensi sistem
+    function prefersDarkMode() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    
+    // Fungsi untuk menerapkan tema
+    function applyTheme() {
+        let shouldApplyDark = false;
+        
+        switch (darkModePreference) {
+            case 'dark':
+                shouldApplyDark = true;
+                break;
+            case 'light':
+                shouldApplyDark = false;
+                break;
+            case 'system':
+            default:
+                shouldApplyDark = prefersDarkMode();
+                break;
+        }
+        
+        if (shouldApplyDark) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        // Update ikon
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        if (sunIcon && moonIcon) {
+            sunIcon.classList.toggle('hidden', shouldApplyDark);
+            moonIcon.classList.toggle('hidden', !shouldApplyDark);
+        }
+        
+        // Simpan status dark mode
+        localStorage.setItem('darkMode', shouldApplyDark);
+    }
+    
+    // Terapkan tema saat inisialisasi
+    applyTheme();
+    
+    // Tambahkan listener untuk perubahan preferensi sistem
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (darkModePreference === 'system') {
+                applyTheme();
+            }
+        });
+    }
+    
+    // Toggle dark mode saat tombol diklik
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', () => {
+            // Jika menggunakan preferensi sistem, ubah ke manual
+            if (darkModePreference === 'system') {
+                darkModePreference = prefersDarkMode() ? 'light' : 'dark';
+            } else {
+                // Toggle antara light dan dark
+                darkModePreference = darkModePreference === 'dark' ? 'light' : 'dark';
+            }
+            
+            localStorage.setItem('darkModePreference', darkModePreference);
+            applyTheme();
+        });
+    }
+    
+    // Ekspos fungsi untuk digunakan di panel pengaturan
+    window.darkModeUtils = {
+        setPreference: (preference) => {
+            darkModePreference = preference;
+            localStorage.setItem('darkModePreference', preference);
+            applyTheme();
+        },
+        getPreference: () => darkModePreference,
+        applyTheme: applyTheme
+    };
+}
+
+// Inisialisasi panel pengaturan
+function initSettingsPanel() {
+    const settingsToggle = document.getElementById('settingsToggle');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const closeSettings = document.getElementById('closeSettings');
+    const themeRadios = document.querySelectorAll('input[name="theme"]');
+    
+    // Tampilkan panel pengaturan
+    settingsToggle.addEventListener('click', () => {
+        settingsPanel.classList.remove('hidden');
+        setTimeout(() => {
+            settingsPanel.classList.remove('opacity-0', 'translate-y-2');
+        }, 10);
+        
+        // Set radio button sesuai preferensi saat ini
+        const currentPreference = window.darkModeUtils.getPreference();
+        document.querySelector(`input[name="theme"][value="${currentPreference}"]`).checked = true;
+    });
+    
+    // Tutup panel pengaturan
+    closeSettings.addEventListener('click', () => {
+        settingsPanel.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => {
+            settingsPanel.classList.add('hidden');
+        }, 300);
+    });
+    
+    // Ubah tema saat radio button dipilih
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.checked) {
+                window.darkModeUtils.setPreference(radio.value);
+            }
+        });
+    });
+    
+    // Tutup panel jika klik di luar panel
+    document.addEventListener('click', (e) => {
+        if (!settingsPanel.contains(e.target) && e.target !== settingsToggle && !settingsToggle.contains(e.target) && !settingsPanel.classList.contains('hidden')) {
+            settingsPanel.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => {
+                settingsPanel.classList.add('hidden');
+            }, 300);
+        }
+    });
+}
+
+// Panggil fungsi inisialisasi dark mode dan panel pengaturan saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    initDarkMode();
+    initSettingsPanel();
+});
+
 // Jam digital
 function updateClock() {
   const now = new Date();
@@ -8,6 +148,36 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
+
+// Dark Mode
+document.addEventListener('DOMContentLoaded', function() {
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const sunIcon = document.getElementById('sunIcon');
+  const moonIcon = document.getElementById('moonIcon');
+  
+  // Cek preferensi tema dari localStorage
+  const isDarkMode = localStorage.getItem('darkMode') === 'true';
+  
+  // Terapkan tema sesuai preferensi
+  if (isDarkMode) {
+    document.documentElement.classList.add('dark');
+    sunIcon.classList.add('hidden');
+    moonIcon.classList.remove('hidden');
+  }
+  
+  // Toggle dark mode saat tombol diklik
+  darkModeToggle.addEventListener('click', function() {
+    document.documentElement.classList.toggle('dark');
+    
+    // Update ikon
+    const isDark = document.documentElement.classList.contains('dark');
+    sunIcon.classList.toggle('hidden', isDark);
+    moonIcon.classList.toggle('hidden', !isDark);
+    
+    // Simpan preferensi ke localStorage
+    localStorage.setItem('darkMode', isDark);
+  });
+});
 
 // Statistik Pengunjung
 document.addEventListener('DOMContentLoaded', function() {
@@ -31,7 +201,8 @@ document.addEventListener('DOMContentLoaded', function() {
       'direct': 0,
       'other': 0
     },
-    lastVisit: null
+    lastVisit: null,
+    visitorLocations: [] // Array untuk menyimpan lokasi pengunjung
   };
 
   // Fungsi untuk menambah jumlah pengunjung
@@ -408,5 +579,100 @@ document.addEventListener('DOMContentLoaded', function() {
     statsModal.classList.remove('hidden');
     renderCharts();
     analyzeTrafficSources();
+    initVisitorMap(); // Inisialisasi peta pengunjung
   });
+  
+  // Fungsi untuk mendapatkan lokasi pengunjung dan menampilkan peta
+  function getVisitorLocation() {
+    // Gunakan IP Geolocation API untuk mendapatkan lokasi pengunjung
+    fetch('https://ipapi.co/json/')
+      .then(response => response.json())
+      .then(data => {
+        // Simpan lokasi pengunjung jika valid
+        if (data.latitude && data.longitude) {
+          const locationData = {
+            lat: data.latitude,
+            lng: data.longitude,
+            city: data.city || 'Unknown',
+            country: data.country_name || 'Unknown',
+            ip: data.ip || 'Unknown',
+            timestamp: new Date().toISOString()
+          };
+          
+          // Tambahkan ke array lokasi pengunjung (batasi hingga 100 entri)
+          visitorStats.visitorLocations.push(locationData);
+          if (visitorStats.visitorLocations.length > 100) {
+            visitorStats.visitorLocations.shift(); // Hapus entri tertua jika melebihi 100
+          }
+          
+          // Simpan ke localStorage
+          localStorage.setItem('visitorStats', JSON.stringify(visitorStats));
+          
+          // Update peta jika modal statistik sedang terbuka
+          if (!statsModal.classList.contains('hidden')) {
+            updateVisitorMap();
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error getting visitor location:', error);
+      });
+  }
+  
+  // Fungsi untuk menginisialisasi peta
+  let visitorMap;
+  function initVisitorMap() {
+    // Periksa apakah peta sudah diinisialisasi
+    if (visitorMap) {
+      updateVisitorMap();
+      return;
+    }
+    
+    // Inisialisasi peta dengan lokasi default (Indonesia)
+    visitorMap = L.map('visitorMap').setView([-2.5489, 118.0149], 4);
+    
+    // Tambahkan layer peta dari OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(visitorMap);
+    
+    // Update peta dengan lokasi pengunjung
+    updateVisitorMap();
+  }
+  
+  // Fungsi untuk memperbarui peta dengan marker lokasi pengunjung
+  function updateVisitorMap() {
+    // Pastikan peta sudah diinisialisasi
+    if (!visitorMap) return;
+    
+    // Hapus semua marker yang ada
+    visitorMap.eachLayer(layer => {
+      if (layer instanceof L.Marker) {
+        visitorMap.removeLayer(layer);
+      }
+    });
+    
+    // Tambahkan marker untuk setiap lokasi pengunjung
+    visitorStats.visitorLocations.forEach(location => {
+      const marker = L.marker([location.lat, location.lng]).addTo(visitorMap);
+      marker.bindPopup(`
+        <b>${location.city}, ${location.country}</b><br>
+        Waktu kunjungan: ${new Date(location.timestamp).toLocaleString()}
+      `);
+    });
+    
+    // Jika tidak ada lokasi, tambahkan pesan
+    if (visitorStats.visitorLocations.length === 0) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'text-center py-4 text-gray-500';
+      messageDiv.innerHTML = 'Belum ada data lokasi pengunjung';
+      document.getElementById('visitorMap').appendChild(messageDiv);
+    }
+    
+    // Sesuaikan tampilan peta
+    visitorMap.invalidateSize();
+  }
+  
+  // Panggil fungsi untuk mendapatkan lokasi pengunjung saat halaman dimuat
+  getVisitorLocation();
 });
