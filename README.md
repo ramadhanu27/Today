@@ -8,7 +8,7 @@ Website modern untuk membagikan link sosial media dengan tampilan profesional, s
 
 - Desain modern dengan Tailwind CSS
 - Profil dengan foto dan bio
-- Daftar link sosial media (TikTok, Instagram, Facebook, Gmail)
+- Daftar link sosial media (TikTok, Instagram, Facebook, Gmail, Telegram)
 - Logo sosial media pada setiap link
 - Statistik jumlah klik pada setiap link (tersimpan di browser)
 - Loader/progress bar animasi saat halaman dibuka
