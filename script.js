@@ -247,41 +247,54 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
+    console.log('Menyimpan data pengunjung dengan ID:', visitorId);
+    
     // Simpan data kunjungan ke Supabase
     try {
-      const { data, error } = await supabase
-        .from('visitor_stats')
-        .insert([
-          { 
-            visitor_id: visitorId,
-            visit_time: new Date().toISOString(),
-            user_agent: userAgent,
-            language: language,
-            referrer: referrer,
-            traffic_source: source
-          }
-        ]);
+      // Periksa apakah pengunjung ini sudah pernah berkunjung hari ini
+      const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+      const startOfDay = today + 'T00:00:00.000Z';
+      const endOfDay = today + 'T23:59:59.999Z';
       
-      if (error) {
-        console.error('Error menyimpan data pengunjung ke Supabase:', error);
-      } else {
-        console.log('Data pengunjung berhasil disimpan ke Supabase');
+      const { data: existingVisits, error: checkError } = await supabase
+        .from('visitor_stats')
+        .select('id')
+        .eq('visitor_id', visitorId)
+        .gte('visit_time', startOfDay)
+        .lte('visit_time', endOfDay)
+        .limit(1);
+      
+      if (checkError) {
+        console.error('Error memeriksa kunjungan yang ada:', checkError);
       }
       
-      // Ambil total pengunjung unik dari Supabase
-      const { data: uniqueVisitors, error: countError } = await supabase
-        .from('visitor_stats')
-        .select('visitor_id', { count: 'exact', head: true })
-        .eq('visitor_id', visitorId);
-      
-      if (countError) {
-        console.error('Error mengambil jumlah pengunjung dari Supabase:', countError);
+      // Jika pengunjung belum berkunjung hari ini, tambahkan data baru
+      if (!existingVisits || existingVisits.length === 0) {
+        const { data, error } = await supabase
+          .from('visitor_stats')
+          .insert([
+            { 
+              visitor_id: visitorId,
+              visit_time: new Date().toISOString(),
+              user_agent: userAgent,
+              language: language,
+              referrer: referrer,
+              traffic_source: source,
+              page: window.location.pathname
+            }
+          ]);
+        
+        if (error) {
+          console.error('Error menyimpan data pengunjung ke Supabase:', error);
+        } else {
+          console.log('Data pengunjung berhasil disimpan ke Supabase');
+        }
       } else {
-        // Update UI dengan jumlah pengunjung
-        const { count } = uniqueVisitors;
-        document.getElementById('visitorCount').textContent = count || 0;
-        document.getElementById('totalVisitors').textContent = count || 0;
+        console.log('Pengunjung sudah tercatat hari ini, tidak menambahkan data baru');
       }
+      
+      // Setelah menyimpan data, panggil fungsi untuk mengambil total pengunjung unik
+      await fetchTotalUniqueVisitors();
       
     } catch (err) {
       console.error('Error saat berinteraksi dengan Supabase:', err);
@@ -360,20 +373,38 @@ document.addEventListener('DOMContentLoaded', function() {
   // Fungsi untuk mengambil total pengunjung unik dari Supabase
   async function fetchTotalUniqueVisitors() {
     try {
+      // Mengambil jumlah pengunjung unik dengan menghitung distinct visitor_id
       const { data, error, count } = await supabase
         .from('visitor_stats')
-        .select('visitor_id', { count: 'exact' })
-        .limit(1);
+        .select('visitor_id', { count: 'exact', head: false })
+        .limit(1000); // Meningkatkan limit untuk memastikan semua data terhitung
       
       if (error) {
         console.error('Error mengambil jumlah pengunjung unik dari Supabase:', error);
         return;
       }
       
-      // Update UI dengan jumlah pengunjung unik
-      if (count !== undefined) {
+      // Hitung jumlah pengunjung unik dengan Set
+      if (data && data.length > 0) {
+        // Menggunakan Set untuk menghitung visitor_id unik
+        const uniqueVisitors = new Set();
+        data.forEach(visit => {
+          if (visit.visitor_id) {
+            uniqueVisitors.add(visit.visitor_id);
+          }
+        });
+        
+        const uniqueCount = uniqueVisitors.size;
+        console.log('Jumlah pengunjung unik:', uniqueCount);
+        
+        // Update UI dengan jumlah pengunjung unik
+        document.getElementById('visitorCount').textContent = uniqueCount;
+        document.getElementById('totalVisitors').textContent = uniqueCount;
+      } else if (count !== undefined) {
+        // Fallback ke count jika data tidak tersedia
         document.getElementById('visitorCount').textContent = count;
         document.getElementById('totalVisitors').textContent = count;
+        console.log('Menggunakan count dari Supabase:', count);
       }
     } catch (err) {
       console.error('Error saat mengambil data pengunjung dari Supabase:', err);
@@ -415,10 +446,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // Fungsi untuk membuat grafik
   let trendChart, pagesChart, trafficChart;
   
-  function renderCharts() {
-    renderTrendChart('daily');
-    renderPopularPagesChart();
-    renderTrafficSourceChart();
+  async function renderCharts() {
+    // Panggil semua fungsi chart secara asynchronous
+    try {
+      console.log('Memulai render semua chart');
+      await renderTrendChart('daily');
+      await renderPopularPagesChart();
+      await renderTrafficSourceChart();
+      console.log('Semua chart berhasil dirender');
+    } catch (err) {
+      console.error('Error saat merender chart:', err);
+    }
   }
   
   async function renderTrendChart(period) {
@@ -432,6 +470,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let title = '';
     
     try {
+      console.log('Memuat data tren untuk periode:', period);
+      
       // Siapkan data berdasarkan periode dari Supabase
       if (period === 'daily') {
         // Ambil data 7 hari terakhir
@@ -439,9 +479,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 6); // 7 hari termasuk hari ini
         
+        console.log('Mengambil data dari', startDate.toISOString(), 'hingga', endDate.toISOString());
+        
         const { data: visitsData, error } = await supabase
           .from('visitor_stats')
-          .select('visit_time')
+          .select('visit_time, visitor_id')
           .gte('visit_time', startDate.toISOString())
           .lte('visit_time', endDate.toISOString());
         
@@ -452,12 +494,31 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
         
-        // Kelompokkan data berdasarkan tanggal
+        console.log('Data kunjungan yang diterima:', visitsData);
+        
+        // Kelompokkan data berdasarkan tanggal dan visitor_id untuk menghitung pengunjung unik per hari
         const dailyData = {};
+        const uniqueVisitorsByDay = {};
+        
         visitsData.forEach(visit => {
           const dateStr = visit.visit_time.split('T')[0];
-          dailyData[dateStr] = (dailyData[dateStr] || 0) + 1;
+          
+          // Inisialisasi jika belum ada
+          if (!dailyData[dateStr]) {
+            dailyData[dateStr] = 0;
+            uniqueVisitorsByDay[dateStr] = new Set();
+          }
+          
+          // Tambahkan visitor_id ke set untuk menghitung pengunjung unik
+          uniqueVisitorsByDay[dateStr].add(visit.visitor_id);
         });
+        
+        // Hitung jumlah pengunjung unik per hari
+        for (const dateStr in uniqueVisitorsByDay) {
+          dailyData[dateStr] = uniqueVisitorsByDay[dateStr].size;
+        }
+        
+        console.log('Data harian yang diolah:', dailyData);
         
         // Buat array tanggal untuk 7 hari terakhir
         const dates = [];
@@ -476,14 +537,137 @@ document.addEventListener('DOMContentLoaded', function() {
         title = 'Kunjungan 7 Hari Terakhir';
         
       } else if (period === 'weekly') {
-        // Untuk data mingguan, kita tetap menggunakan data lokal sebagai fallback
-        // karena memerlukan perhitungan yang lebih kompleks
-        fallbackToLocalData('weekly');
-        return;
-      } else {
-        // Untuk data bulanan, kita tetap menggunakan data lokal sebagai fallback
-        fallbackToLocalData('monthly');
-        return;
+        // Ambil data 4 minggu terakhir
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 28); // 4 minggu terakhir
+        
+        console.log('Mengambil data mingguan dari', startDate.toISOString(), 'hingga', endDate.toISOString());
+        
+        const { data: visitsData, error } = await supabase
+          .from('visitor_stats')
+          .select('visit_time, visitor_id')
+          .gte('visit_time', startDate.toISOString())
+          .lte('visit_time', endDate.toISOString());
+        
+        if (error) {
+          console.error('Error mengambil data kunjungan mingguan:', error);
+          // Fallback ke data lokal jika ada error
+          fallbackToLocalData('weekly');
+          return;
+        }
+        
+        console.log('Data kunjungan mingguan yang diterima:', visitsData);
+        
+        // Kelompokkan data berdasarkan minggu dan visitor_id untuk menghitung pengunjung unik per minggu
+        const weeklyData = {};
+        const uniqueVisitorsByWeek = {};
+        
+        visitsData.forEach(visit => {
+          const visitDate = new Date(visit.visit_time);
+          const year = visitDate.getFullYear();
+          const weekNumber = getWeekNumber(visitDate);
+          const weekKey = `${year}-${weekNumber}`;
+          
+          // Inisialisasi jika belum ada
+          if (!weeklyData[weekKey]) {
+            weeklyData[weekKey] = 0;
+            uniqueVisitorsByWeek[weekKey] = new Set();
+          }
+          
+          // Tambahkan visitor_id ke set untuk menghitung pengunjung unik
+          uniqueVisitorsByWeek[weekKey].add(visit.visitor_id);
+        });
+        
+        // Hitung jumlah pengunjung unik per minggu
+        for (const weekKey in uniqueVisitorsByWeek) {
+          weeklyData[weekKey] = uniqueVisitorsByWeek[weekKey].size;
+        }
+        
+        console.log('Data mingguan yang diolah:', weeklyData);
+        
+        // Ambil 4 minggu terakhir
+        const weeks = [];
+        for (let i = 0; i < 4; i++) {
+          const d = new Date(endDate);
+          d.setDate(d.getDate() - (i * 7));
+          const weekNumber = getWeekNumber(d);
+          const year = d.getFullYear();
+          const weekKey = `${year}-${weekNumber}`;
+          weeks.unshift(weekKey); // Tambahkan di awal array untuk urutan kronologis
+        }
+        
+        labels = weeks.map(week => 'Minggu ' + week.split('-')[1]);
+        data = weeks.map(week => weeklyData[week] || 0);
+        title = 'Kunjungan 4 Minggu Terakhir';
+        
+      } else if (period === 'monthly') {
+        // Ambil data 6 bulan terakhir
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 5); // 6 bulan terakhir
+        
+        console.log('Mengambil data bulanan dari', startDate.toISOString(), 'hingga', endDate.toISOString());
+        
+        const { data: visitsData, error } = await supabase
+          .from('visitor_stats')
+          .select('visit_time, visitor_id')
+          .gte('visit_time', startDate.toISOString())
+          .lte('visit_time', endDate.toISOString());
+        
+        if (error) {
+          console.error('Error mengambil data kunjungan bulanan:', error);
+          // Fallback ke data lokal jika ada error
+          fallbackToLocalData('monthly');
+          return;
+        }
+        
+        console.log('Data kunjungan bulanan yang diterima:', visitsData);
+        
+        // Kelompokkan data berdasarkan bulan dan visitor_id untuk menghitung pengunjung unik per bulan
+        const monthlyData = {};
+        const uniqueVisitorsByMonth = {};
+        
+        visitsData.forEach(visit => {
+          const visitDate = new Date(visit.visit_time);
+          const year = visitDate.getFullYear();
+          const month = visitDate.getMonth() + 1; // Bulan dimulai dari 0
+          const monthKey = `${year}-${month.toString().padStart(2, '0')}`;
+          
+          // Inisialisasi jika belum ada
+          if (!monthlyData[monthKey]) {
+            monthlyData[monthKey] = 0;
+            uniqueVisitorsByMonth[monthKey] = new Set();
+          }
+          
+          // Tambahkan visitor_id ke set untuk menghitung pengunjung unik
+          uniqueVisitorsByMonth[monthKey].add(visit.visitor_id);
+        });
+        
+        // Hitung jumlah pengunjung unik per bulan
+        for (const monthKey in uniqueVisitorsByMonth) {
+          monthlyData[monthKey] = uniqueVisitorsByMonth[monthKey].size;
+        }
+        
+        console.log('Data bulanan yang diolah:', monthlyData);
+        
+        // Ambil 6 bulan terakhir
+        const months = [];
+        for (let i = 0; i < 6; i++) {
+          const d = new Date(endDate);
+          d.setMonth(d.getMonth() - i);
+          const year = d.getFullYear();
+          const month = d.getMonth() + 1; // Bulan dimulai dari 0
+          const monthKey = `${year}-${month.toString().padStart(2, '0')}`;
+          months.unshift(monthKey); // Tambahkan di awal array untuk urutan kronologis
+        }
+        
+        labels = months.map(month => {
+          const [year, monthNum] = month.split('-');
+          return ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'][parseInt(monthNum) - 1];
+        });
+        data = months.map(month => monthlyData[month] || 0);
+        title = 'Kunjungan 6 Bulan Terakhir';
       }
     } catch (err) {
       console.error('Error saat mengambil data tren dari Supabase:', err);
@@ -567,127 +751,367 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  function renderPopularPagesChart() {
+  async function renderPopularPagesChart() {
     // Hapus chart sebelumnya jika ada
     if (pagesChart) {
       pagesChart.destroy();
     }
     
-    const pageData = visitorStats.pageVisits;
-    const labels = Object.keys(pageData);
-    const data = Object.values(pageData);
-    
-    // Buat chart baru
-    const ctx = document.getElementById('popularPagesChart').getContext('2d');
-    pagesChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Jumlah Kunjungan',
-          data: data,
-          backgroundColor: [
-            'rgba(59, 130, 246, 0.7)',
-            'rgba(16, 185, 129, 0.7)',
-            'rgba(245, 158, 11, 0.7)',
-            'rgba(239, 68, 68, 0.7)'
-          ],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
+    try {
+      console.log('Mengambil data halaman populer dari Supabase');
+      
+      // Ambil data dari Supabase untuk 30 hari terakhir
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30); // 30 hari terakhir
+      
+      const { data: visitsData, error } = await supabase
+        .from('visitor_stats')
+        .select('page, visitor_id')
+        .gte('visit_time', startDate.toISOString())
+        .lte('visit_time', endDate.toISOString());
+      
+      if (error) {
+        console.error('Error mengambil data halaman populer:', error);
+        // Fallback ke data lokal
+        fallbackToLocalPageData();
+        return;
+      }
+      
+      console.log('Data halaman yang diterima:', visitsData);
+      
+      // Kelompokkan data berdasarkan halaman
+      const pageData = {};
+      
+      visitsData.forEach(visit => {
+        if (visit.page) {
+          // Gunakan pathname saja tanpa query string
+          const pagePath = visit.page.split('?')[0];
+          pageData[pagePath] = (pageData[pagePath] || 0) + 1;
+        }
+      });
+      
+      console.log('Data halaman yang diolah:', pageData);
+      
+      // Urutkan halaman berdasarkan jumlah kunjungan (descending)
+      const sortedPages = Object.entries(pageData)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5); // Ambil 5 halaman teratas
+      
+      const labels = sortedPages.map(([page]) => {
+        // Tampilkan nama halaman yang lebih pendek
+        const pathParts = page.split('/');
+        return pathParts[pathParts.length - 1] || 'Beranda';
+      });
+      
+      const data = sortedPages.map(([, count]) => count);
+      
+      // Buat chart baru
+      const ctx = document.getElementById('popularPagesChart').getContext('2d');
+      pagesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Jumlah Kunjungan',
+            data: data,
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(16, 185, 129, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(239, 68, 68, 0.7)',
+              'rgba(139, 92, 246, 0.7)'
+            ],
+            borderWidth: 0
+          }]
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Halaman Populer (30 Hari Terakhir)',
+              font: {
+                size: 16
+              }
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0
+              }
             }
           }
         }
-      }
-    });
+      });
+    } catch (err) {
+      console.error('Error saat mengambil data halaman populer:', err);
+      // Fallback ke data lokal
+      fallbackToLocalPageData();
+    }
+    
+    // Fungsi fallback ke data lokal
+    function fallbackToLocalPageData() {
+      console.log('Menggunakan data lokal untuk halaman populer');
+      const pageData = visitorStats.pageVisits;
+      const labels = Object.keys(pageData);
+      const data = Object.values(pageData);
+      
+      // Buat chart baru
+      const ctx = document.getElementById('popularPagesChart').getContext('2d');
+      pagesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Jumlah Kunjungan',
+            data: data,
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(16, 185, 129, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(239, 68, 68, 0.7)'
+            ],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Halaman Populer (Data Lokal)',
+              font: {
+                size: 16
+              }
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+    }
   }
   
-  function renderTrafficSourceChart() {
+  async function renderTrafficSourceChart() {
     // Hapus chart sebelumnya jika ada
     if (trafficChart) {
       trafficChart.destroy();
     }
     
-    const trafficData = visitorStats.trafficSources;
-    const labels = {
-      'organic': 'Organik',
-      'referral': 'Referral',
-      'social': 'Sosial Media',
-      'direct': 'Langsung',
-      'other': 'Lainnya'
-    };
-    
-    const data = Object.keys(trafficData).map(key => trafficData[key]);
-    const chartLabels = Object.keys(trafficData).map(key => labels[key]);
-    
-    // Buat chart baru
-    const ctx = document.getElementById('trafficSourceChart').getContext('2d');
-    trafficChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: chartLabels,
-        datasets: [{
-          data: data,
-          backgroundColor: [
-            'rgba(59, 130, 246, 0.7)',
-            'rgba(16, 185, 129, 0.7)',
-            'rgba(245, 158, 11, 0.7)',
-            'rgba(239, 68, 68, 0.7)',
-            'rgba(139, 92, 246, 0.7)'
-          ],
-          borderWidth: 1,
-          borderColor: '#ffffff'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: {
-              boxWidth: 12,
+    try {
+      console.log('Mengambil data sumber lalu lintas dari Supabase');
+      
+      // Ambil data dari Supabase untuk 30 hari terakhir
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30); // 30 hari terakhir
+      
+      const { data: visitsData, error } = await supabase
+        .from('visitor_stats')
+        .select('traffic_source')
+        .gte('visit_time', startDate.toISOString())
+        .lte('visit_time', endDate.toISOString());
+      
+      if (error) {
+        console.error('Error mengambil data sumber lalu lintas:', error);
+        // Fallback ke data lokal
+        fallbackToLocalTrafficData();
+        return;
+      }
+      
+      console.log('Data sumber lalu lintas yang diterima:', visitsData);
+      
+      // Kelompokkan data berdasarkan sumber lalu lintas
+      const trafficData = {
+        'organic': 0,
+        'referral': 0,
+        'social': 0,
+        'direct': 0,
+        'other': 0
+      };
+      
+      visitsData.forEach(visit => {
+        if (visit.traffic_source) {
+          // Pastikan sumber lalu lintas valid
+          if (trafficData.hasOwnProperty(visit.traffic_source)) {
+            trafficData[visit.traffic_source]++;
+          } else {
+            trafficData['other']++;
+          }
+        } else {
+          trafficData['direct']++;
+        }
+      });
+      
+      console.log('Data sumber lalu lintas yang diolah:', trafficData);
+      
+      const labels = {
+        'organic': 'Organik',
+        'referral': 'Referral',
+        'social': 'Sosial Media',
+        'direct': 'Langsung',
+        'other': 'Lainnya'
+      };
+      
+      // Filter hanya sumber lalu lintas yang memiliki nilai > 0
+      const filteredSources = Object.keys(trafficData).filter(key => trafficData[key] > 0);
+      
+      const data = filteredSources.map(key => trafficData[key]);
+      const chartLabels = filteredSources.map(key => labels[key]);
+      
+      // Buat chart baru
+      const ctx = document.getElementById('trafficSourceChart').getContext('2d');
+      trafficChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(16, 185, 129, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(239, 68, 68, 0.7)',
+              'rgba(139, 92, 246, 0.7)'
+            ],
+            borderWidth: 1,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Sumber Lalu Lintas (30 Hari Terakhir)',
               font: {
-                size: 10
+                size: 16
+              }
+            },
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                font: {
+                  size: 10
+                }
               }
             }
           }
         }
-      }
-    });
+      });
+      
+      // Update analisis sumber lalu lintas
+      analyzeTrafficSources(trafficData);
+      
+    } catch (err) {
+      console.error('Error saat mengambil data sumber lalu lintas:', err);
+      // Fallback ke data lokal
+      fallbackToLocalTrafficData();
+    }
+    
+    // Fungsi fallback ke data lokal
+    function fallbackToLocalTrafficData() {
+      console.log('Menggunakan data lokal untuk sumber lalu lintas');
+      const trafficData = visitorStats.trafficSources;
+      const labels = {
+        'organic': 'Organik',
+        'referral': 'Referral',
+        'social': 'Sosial Media',
+        'direct': 'Langsung',
+        'other': 'Lainnya'
+      };
+      
+      const data = Object.keys(trafficData).map(key => trafficData[key]);
+      const chartLabels = Object.keys(trafficData).map(key => labels[key]);
+      
+      // Buat chart baru
+      const ctx = document.getElementById('trafficSourceChart').getContext('2d');
+      trafficChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(16, 185, 129, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(239, 68, 68, 0.7)',
+              'rgba(139, 92, 246, 0.7)'
+            ],
+            borderWidth: 1,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Sumber Lalu Lintas (Data Lokal)',
+              font: {
+                size: 16
+              }
+            },
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                font: {
+                  size: 10
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // Update analisis sumber lalu lintas dengan data lokal
+      analyzeTrafficSources(trafficData);
+    }
   }
   
   // Analisis sumber traffic yang lebih detail
-  function analyzeTrafficSources() {
-    const trafficData = visitorStats.trafficSources;
-    const total = Object.values(trafficData).reduce((sum, val) => sum + val, 0);
+  function analyzeTrafficSources(trafficData = null) {
+    // Gunakan data yang diberikan atau fallback ke data lokal
+    const sourceData = trafficData || visitorStats.trafficSources;
+    const total = Object.values(sourceData).reduce((sum, val) => sum + val, 0);
+    
+    console.log('Menganalisis sumber lalu lintas:', sourceData, 'Total:', total);
     
     // Hitung persentase untuk setiap sumber
     const percentages = {};
-    for (const source in trafficData) {
-      percentages[source] = total > 0 ? Math.round((trafficData[source] / total) * 100) : 0;
+    for (const source in sourceData) {
+      percentages[source] = total > 0 ? Math.round((sourceData[source] / total) * 100) : 0;
     }
     
     // Tentukan sumber traffic terbanyak
     let topSource = 'direct';
     let topValue = 0;
     
-    for (const source in trafficData) {
-      if (trafficData[source] > topValue) {
-        topValue = trafficData[source];
+    for (const source in sourceData) {
+      if (sourceData[source] > topValue) {
+        topValue = sourceData[source];
         topSource = source;
       }
     }
