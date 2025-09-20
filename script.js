@@ -132,10 +132,60 @@ function initSettingsPanel() {
     });
 }
 
+// Internationalization (i18n)
+const translations = {
+  id: {
+    title: 'Jia Wialo',
+    desc:
+      'Douyin Subtitle Indonesia<br>Berbagi video, subtitle, dan info menarik seputar Douyin & budaya Tiongkok. Temukan konten terbaru!<br>Follow semua sosial media untuk update dan kolaborasi.'
+  },
+  en: {
+    title: 'Jia Wialo',
+    desc:
+      'Douyin Subtitles in Indonesia<br>Sharing videos, subtitles, and interesting info about Douyin & Chinese culture. Discover the latest content!<br>Follow all social media for updates and collaboration.'
+  },
+  zh: {
+    title: '贾·维娆 Jia Wialo',
+    desc:
+      '抖音印尼字幕<br>分享抖音视频、字幕以及中国文化的有趣资讯。发现最新内容！<br>关注所有社交媒体获取更新与合作信息。'
+  }
+};
+
+function applyLanguage(lang) {
+  const t = translations[lang] || translations.id;
+  const titleEl = document.getElementById('headlineTitle');
+  const descEl = document.getElementById('headlineDesc');
+  if (titleEl) titleEl.textContent = t.title;
+  if (descEl) descEl.innerHTML = t.desc; // contains <br>
+}
+
+function initLanguage() {
+  const select = document.getElementById('langSwitcher');
+  // Load saved language or detect from browser (id/en/zh)
+  let saved = localStorage.getItem('siteLanguage');
+  if (!saved) {
+    const nav = (navigator.language || navigator.userLanguage || 'id').toLowerCase();
+    if (nav.startsWith('zh')) saved = 'zh';
+    else if (nav.startsWith('en')) saved = 'en';
+    else saved = 'id';
+  }
+  applyLanguage(saved);
+  if (select) {
+    select.value = saved;
+    select.addEventListener('change', () => {
+      const lang = select.value;
+      localStorage.setItem('siteLanguage', lang);
+      applyLanguage(lang);
+    });
+  }
+}
+
 // Panggil fungsi inisialisasi dark mode dan panel pengaturan saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
     initDarkMode();
     initSettingsPanel();
+    initLanguage();
+    registerServiceWorker();
 });
 
 // Jam digital
@@ -177,3 +227,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
   });
 });
+
+// PWA: Service Worker registration and install prompt
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').then(() => {
+      console.log('Service Worker registered');
+    }).catch(err => console.warn('SW registration failed:', err));
+  }
+
+  // Handle install prompt
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Create a lightweight install button if not exists
+    if (!document.getElementById('pwaInstallBtn')) {
+      const btn = document.createElement('button');
+      btn.id = 'pwaInstallBtn';
+      btn.textContent = 'Install App';
+      btn.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg bg-cyan-500 hover:bg-cyan-600 text-white text-sm z-50';
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('PWA install:', outcome);
+            deferredPrompt = null;
+          }
+        } finally {
+          btn.remove();
+        }
+      });
+      document.body.appendChild(btn);
+    }
+  });
+
+  // Optionally hide the button after installed
+  window.addEventListener('appinstalled', () => {
+    const btn = document.getElementById('pwaInstallBtn');
+    if (btn) btn.remove();
+    console.log('App installed');
+  });
+}

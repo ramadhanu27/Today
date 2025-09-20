@@ -1,0 +1,22 @@
+{
+  "name": "Jia Wialo",
+  "short_name": "JiaWialo",
+  "description": "Douyin Subtitle Indonesia - Konten, subtitle, dan info budaya Tiongkok.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#0ea5e9",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "529156440_122125344008910630_3893160631968165673_n.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "529156440_122125344008910630_3893160631968165673_n.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
