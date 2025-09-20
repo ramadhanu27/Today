@@ -103,3 +103,65 @@
   background-color: #60a5fa;
   border-color: #60a5fa;
 }
+
+/* ===== UI/UX Enhancements ===== */
+/* Ripple effect */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate; /* ensure ripple is clipped */
+}
+
+.ripple-effect {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0);
+  animation: ripple 650ms ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Entrance animation (fade-up) */
+.fade-up {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 500ms ease, transform 500ms ease;
+}
+.fade-up.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Focus styles for accessibility */
+.focusable:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.55), 0 0 0 6px rgba(255, 255, 255, 0.6);
+}
+.dark .focusable:focus-visible {
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.6), 0 0 0 6px rgba(31, 41, 55, 0.6);
+}
+
+/* Hover elevation for buttons */
+.btn-elevate {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.btn-elevate:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 20px -8px rgba(0,0,0,0.25);
+}
+.dark .btn-elevate:hover {
+  box-shadow: 0 10px 20px -8px rgba(0,0,0,0.5);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up { opacity: 1; transform: none; transition: none; }
+  .btn-elevate { transition: none; }
+}

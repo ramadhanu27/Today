@@ -186,6 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initSettingsPanel();
     initLanguage();
     registerServiceWorker();
+    initRipple();
+    initEntranceAnimations();
 });
 
 // Jam digital
@@ -199,34 +201,49 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Dark Mode
-document.addEventListener('DOMContentLoaded', function() {
-  const darkModeToggle = document.getElementById('darkModeToggle');
-  const sunIcon = document.getElementById('sunIcon');
-  const moonIcon = document.getElementById('moonIcon');
-  
-  // Cek preferensi tema dari localStorage
-  const isDarkMode = localStorage.getItem('darkMode') === 'true';
-  
-  // Terapkan tema sesuai preferensi
-  if (isDarkMode) {
-    document.documentElement.classList.add('dark');
-    sunIcon.classList.add('hidden');
-    moonIcon.classList.remove('hidden');
-  }
-  
-  // Toggle dark mode saat tombol diklik
-  darkModeToggle.addEventListener('click', function() {
-    document.documentElement.classList.toggle('dark');
-    
-    // Update ikon
-    const isDark = document.documentElement.classList.contains('dark');
-    sunIcon.classList.toggle('hidden', isDark);
-    moonIcon.classList.toggle('hidden', !isDark);
-    
-    
+// Ripple effect for buttons/links
+function initRipple() {
+  const targets = document.querySelectorAll('.btn-link');
+  targets.forEach((el) => {
+    // Ensure container styles
+    el.classList.add('ripple-container', 'focusable');
+    el.addEventListener('click', function (e) {
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple-effect';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 650);
+    });
   });
-});
+}
+
+// Entrance animations
+function initEntranceAnimations() {
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    document.querySelectorAll('.fade-up').forEach((el) => {
+      el.classList.add('show');
+    });
+    return;
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('show');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.fade-up').forEach((el) => io.observe(el));
+}
 
 // PWA: Service Worker registration and install prompt
 function registerServiceWorker() {
