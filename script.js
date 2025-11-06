@@ -420,8 +420,17 @@ function initAnalytics() {
   const passwordError = document.getElementById('passwordError');
   const refreshAnalytics = document.getElementById('refreshAnalytics');
 
+  // Debug log
+  console.log('Analytics initialized. Button found:', !!analyticsToggle);
+  
+  if (!analyticsToggle) {
+    console.error('Analytics button not found!');
+    return;
+  }
+
   // Show password modal
   analyticsToggle.addEventListener('click', () => {
+    console.log('Analytics button clicked!');
     passwordModal.classList.remove('hidden');
     analyticsPassword.value = '';
     passwordError.classList.add('hidden');
