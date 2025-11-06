@@ -147,7 +147,14 @@
                 </div>
 
                 <!-- Stats Cards -->
-                <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8"></div>
+                        <p class="text-sm opacity-90 flex items-center gap-1">
+                            <span class="animate-pulse">●</span> Live Now
+                        </p>
+                        <p class="text-3xl font-bold mt-1" id="liveVisitors">0</p>
+                    </div>
                     <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white shadow-lg">
                         <p class="text-sm opacity-90">Today's Visits</p>
                         <p class="text-3xl font-bold mt-1" id="todayVisits">0</p>
@@ -166,11 +173,40 @@
                     </div>
                 </div>
 
-                <!-- Chart -->
-                <div class="p-6">
+                <!-- Charts Grid -->
+                <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Last 7 Days Trend -->
                     <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Last 7 Days Trend</h3>
-                        <canvas id="visitsChart" class="w-full" height="80"></canvas>
+                        <canvas id="visitsChart" class="w-full" height="120"></canvas>
+                    </div>
+                    
+                    <!-- Hourly Traffic -->
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Today's Hourly Traffic</h3>
+                        <canvas id="hourlyChart" class="w-full" height="120"></canvas>
+                    </div>
+                    
+                    <!-- Traffic Sources -->
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Traffic Sources</h3>
+                        <canvas id="sourcesChart" class="w-full" height="120"></canvas>
+                    </div>
+                    
+                    <!-- Device Breakdown -->
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Device Breakdown</h3>
+                        <canvas id="deviceChart" class="w-full" height="120"></canvas>
+                    </div>
+                </div>
+
+                <!-- Social Media Clicks -->
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Social Media Clicks</h3>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+                        <div id="socialClicksList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <p class="text-gray-500 dark:text-gray-400 text-center py-4 col-span-2">Loading...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -210,10 +246,19 @@
                     </div>
                 </div>
 
-                <!-- Refresh Button -->
-                <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                <!-- Action Buttons -->
+                <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+                    <button id="exportCSV"
+                        class="flex-1 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        Export CSV
+                    </button>
                     <button id="refreshAnalytics"
-                        class="w-full px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
+                        class="flex-1 px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">

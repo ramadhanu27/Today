@@ -198,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initEntranceAnimations();
     initAnalytics();
     trackPageVisit();
+    initClickTracking();
 });
 
 // Jam digital
@@ -460,6 +461,12 @@ function initAnalytics() {
     loadAnalyticsData();
   });
 
+  // Export CSV
+  const exportCSV = document.getElementById('exportCSV');
+  exportCSV.addEventListener('click', () => {
+    exportAnalyticsToCSV();
+  });
+
   // Close on escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -531,6 +538,23 @@ async function loadAnalyticsData() {
 
     // Update top countries
     updateTopCountries(allVisits);
+
+    // Calculate live visitors (last 5 minutes)
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+    const liveVisitors = allVisits.filter(v => new Date(v.created_at) >= fiveMinutesAgo).length;
+    document.getElementById('liveVisitors').textContent = liveVisitors;
+
+    // Update hourly chart
+    updateHourlyChart(allVisits);
+
+    // Update traffic sources chart
+    updateTrafficSourcesChart(allVisits);
+
+    // Update device breakdown chart
+    updateDeviceChart(allVisits);
+
+    // Load social media clicks
+    await loadSocialClicks();
 
   } catch (error) {
     console.error('Error loading analytics:', error);
@@ -699,4 +723,311 @@ function updateTopCountries(visits) {
       </div>
     `;
   }).join('');
+}
+
+// ============ NEW ANALYTICS FEATURES ============
+
+// Update Hourly Chart
+let hourlyChart = null;
+
+function updateHourlyChart(visits) {
+  const ctx = document.getElementById('hourlyChart');
+  if (!ctx) return;
+
+  // Get today's visits
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayVisits = visits.filter(v => new Date(v.created_at) >= todayStart);
+
+  // Count by hour (0-23)
+  const hourCounts = new Array(24).fill(0);
+  todayVisits.forEach(visit => {
+    const hour = new Date(visit.created_at).getHours();
+    hourCounts[hour]++;
+  });
+
+  const labels = Array.from({length: 24}, (_, i) => `${i}:00`);
+
+  if (hourlyChart) hourlyChart.destroy();
+
+  hourlyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Visits',
+        data: hourCounts,
+        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+        borderColor: 'rgb(59, 130, 246)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+}
+
+// Update Traffic Sources Chart
+let sourcesChart = null;
+
+function updateTrafficSourcesChart(visits) {
+  const ctx = document.getElementById('sourcesChart');
+  if (!ctx) return;
+
+  // Categorize referrers
+  const sources = {
+    'Direct': 0,
+    'Social Media': 0,
+    'Search Engine': 0,
+    'Other': 0
+  };
+
+  visits.forEach(visit => {
+    const ref = visit.referrer.toLowerCase();
+    if (ref === 'direct' || !ref) {
+      sources['Direct']++;
+    } else if (ref.includes('facebook') || ref.includes('instagram') || ref.includes('tiktok') || ref.includes('twitter') || ref.includes('youtube')) {
+      sources['Social Media']++;
+    } else if (ref.includes('google') || ref.includes('bing') || ref.includes('yahoo')) {
+      sources['Search Engine']++;
+    } else {
+      sources['Other']++;
+    }
+  });
+
+  if (sourcesChart) sourcesChart.destroy();
+
+  sourcesChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(sources),
+      datasets: [{
+        data: Object.values(sources),
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(236, 72, 153, 0.8)',
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(251, 146, 60, 0.8)'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+}
+
+// Update Device Chart
+let deviceChart = null;
+
+function updateDeviceChart(visits) {
+  const ctx = document.getElementById('deviceChart');
+  if (!ctx) return;
+
+  const devices = { 'Mobile': 0, 'Desktop': 0, 'Tablet': 0 };
+
+  visits.forEach(visit => {
+    const ua = visit.user_agent.toLowerCase();
+    if (ua.includes('mobile')) devices['Mobile']++;
+    else if (ua.includes('tablet')) devices['Tablet']++;
+    else devices['Desktop']++;
+  });
+
+  if (deviceChart) deviceChart.destroy();
+
+  deviceChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(devices),
+      datasets: [{
+        data: Object.values(devices),
+        backgroundColor: [
+          'rgba(147, 51, 234, 0.8)',
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(34, 197, 94, 0.8)'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+}
+
+// ============ CLICK TRACKING ============
+
+// Initialize click tracking for social media links
+function initClickTracking() {
+  const socialLinks = document.querySelectorAll('a[href*="tiktok"], a[href*="instagram"], a[href*="facebook"], a[href*="youtube"], a[href*="gmail"]');
+  
+  socialLinks.forEach(link => {
+    link.addEventListener('click', async (e) => {
+      const href = link.href;
+      let platform = 'Unknown';
+      
+      if (href.includes('tiktok')) platform = 'TikTok';
+      else if (href.includes('instagram')) platform = 'Instagram';
+      else if (href.includes('facebook')) platform = 'Facebook';
+      else if (href.includes('youtube')) platform = 'YouTube';
+      else if (href.includes('gmail')) platform = 'Gmail';
+      
+      // Track click
+      await trackSocialClick(platform);
+    });
+  });
+}
+
+// Track social media click
+async function trackSocialClick(platform) {
+  try {
+    const location = await getGeolocation();
+    
+    const clickData = {
+      created_at: new Date().toISOString(),
+      platform: platform,
+      session_id: getSessionId(),
+      country: location.country,
+      city: location.city
+    };
+
+    const { error } = await supabase
+      .from('social_clicks')
+      .insert([clickData]);
+
+    if (error) {
+      console.error('Error tracking click:', error);
+    } else {
+      console.log('Click tracked:', platform);
+    }
+  } catch (err) {
+    console.error('Error tracking click:', err);
+  }
+}
+
+// Load social media clicks
+async function loadSocialClicks() {
+  try {
+    const { data: clicks, error } = await supabase
+      .from('social_clicks')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Count by platform
+    const platformCounts = {};
+    clicks.forEach(click => {
+      platformCounts[click.platform] = (platformCounts[click.platform] || 0) + 1;
+    });
+
+    // Update UI
+    const container = document.getElementById('socialClicksList');
+    if (!container) return;
+
+    if (Object.keys(platformCounts).length === 0) {
+      container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4 col-span-2">No clicks yet</p>';
+      return;
+    }
+
+    const icons = {
+      'TikTok': '🎵',
+      'Instagram': '📷',
+      'Facebook': '👥',
+      'YouTube': '📺',
+      'Gmail': '📧'
+    };
+
+    const colors = {
+      'TikTok': 'from-cyan-400 to-pink-400',
+      'Instagram': 'from-pink-500 to-purple-500',
+      'Facebook': 'from-blue-500 to-blue-600',
+      'YouTube': 'from-red-500 to-red-600',
+      'Gmail': 'from-red-400 to-orange-400'
+    };
+
+    container.innerHTML = Object.entries(platformCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([platform, count]) => `
+        <div class="bg-gradient-to-r ${colors[platform] || 'from-gray-400 to-gray-500'} rounded-lg p-4 text-white">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${icons[platform] || '🔗'}</span>
+              <span class="font-semibold">${platform}</span>
+            </div>
+            <span class="text-2xl font-bold">${count}</span>
+          </div>
+          <p class="text-sm opacity-90 mt-1">${count} click${count !== 1 ? 's' : ''}</p>
+        </div>
+      `).join('');
+
+  } catch (error) {
+    console.error('Error loading social clicks:', error);
+  }
+}
+
+// ============ EXPORT TO CSV ============
+
+async function exportAnalyticsToCSV() {
+  try {
+    // Get all visits
+    const { data: visits, error } = await supabase
+      .from('page_visits')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Create CSV content
+    const headers = ['Date & Time', 'Country', 'City', 'Referrer', 'Device', 'User Agent'];
+    const rows = visits.map(visit => {
+      const date = new Date(visit.created_at).toLocaleString();
+      const ua = visit.user_agent.toLowerCase();
+      const device = ua.includes('mobile') ? 'Mobile' : ua.includes('tablet') ? 'Tablet' : 'Desktop';
+      
+      return [
+        date,
+        visit.country || 'Unknown',
+        visit.city || 'Unknown',
+        visit.referrer || 'Direct',
+        device,
+        visit.user_agent
+      ];
+    });
+
+    // Build CSV
+    let csv = headers.join(',') + '\n';
+    rows.forEach(row => {
+      csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+    });
+
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    console.log('CSV exported successfully');
+  } catch (error) {
+    console.error('Error exporting CSV:', error);
+    alert('Error exporting data. Please check console.');
+  }
 }

@@ -40,6 +40,37 @@ CREATE POLICY "Allow authenticated read" ON page_visits
   USING (true);
 ```
 
+### Buat Tabel `social_clicks` (untuk tracking klik social media)
+
+```sql
+-- Create social_clicks table
+CREATE TABLE social_clicks (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  platform TEXT NOT NULL,
+  session_id TEXT,
+  country TEXT,
+  city TEXT
+);
+
+-- Create index
+CREATE INDEX idx_social_clicks_created_at ON social_clicks(created_at DESC);
+CREATE INDEX idx_social_clicks_platform ON social_clicks(platform);
+
+-- Enable RLS
+ALTER TABLE social_clicks ENABLE ROW LEVEL SECURITY;
+
+-- Allow public insert
+CREATE POLICY "Allow public insert" ON social_clicks
+  FOR INSERT
+  WITH CHECK (true);
+
+-- Allow public read
+CREATE POLICY "Allow public read" ON social_clicks
+  FOR SELECT
+  USING (true);
+```
+
 ### Buat Tabel `daily_stats` (Optional - untuk aggregasi)
 
 ```sql
