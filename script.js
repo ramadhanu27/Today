@@ -312,27 +312,70 @@ function getSessionId() {
   return sessionId;
 }
 
-// Get geolocation from IP
+// Get geolocation from IP with multiple fallbacks
 async function getGeolocation() {
-  try {
-    // Using ipapi.co free API (no key required, 1000 requests/day)
-    const response = await fetch('https://ipapi.co/json/');
-    if (!response.ok) throw new Error('Geolocation API failed');
-    
-    const data = await response.json();
-    return {
-      country: data.country_name || 'Unknown',
-      city: data.city || 'Unknown',
-      country_code: data.country_code || 'XX'
-    };
-  } catch (error) {
-    console.warn('Geolocation failed:', error);
-    return {
-      country: 'Unknown',
-      city: 'Unknown',
-      country_code: 'XX'
-    };
+  // Try multiple APIs in sequence
+  const apis = [
+    // API 1: ip-api.com (free, unlimited for non-commercial)
+    async () => {
+      const response = await fetch('http://ip-api.com/json/?fields=status,country,countryCode,city');
+      const data = await response.json();
+      if (data.status === 'success') {
+        return {
+          country: data.country,
+          city: data.city,
+          country_code: data.countryCode
+        };
+      }
+      throw new Error('ip-api failed');
+    },
+    // API 2: ipapi.co (backup)
+    async () => {
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      if (data.country_name) {
+        return {
+          country: data.country_name,
+          city: data.city,
+          country_code: data.country_code
+        };
+      }
+      throw new Error('ipapi.co failed');
+    },
+    // API 3: ipwhois.app (backup)
+    async () => {
+      const response = await fetch('https://ipwho.is/');
+      const data = await response.json();
+      if (data.success) {
+        return {
+          country: data.country,
+          city: data.city,
+          country_code: data.country_code
+        };
+      }
+      throw new Error('ipwho.is failed');
+    }
+  ];
+
+  // Try each API until one succeeds
+  for (const api of apis) {
+    try {
+      const result = await api();
+      console.log('Geolocation detected:', result);
+      return result;
+    } catch (error) {
+      console.warn('Geolocation API attempt failed:', error.message);
+      continue;
+    }
   }
+
+  // All APIs failed
+  console.warn('All geolocation APIs failed');
+  return {
+    country: 'Unknown',
+    city: 'Unknown',
+    country_code: 'XX'
+  };
 }
 
 // Track page visit

@@ -159,6 +159,30 @@ Dashboard Analytics menyediakan:
 - Pastikan Chart.js library sudah di-load
 - Cek di `index.html` baris 10: `<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>`
 
+### Location menampilkan "Unknown"
+**Penyebab:**
+1. **Testing di localhost** - IP lokal (127.0.0.1) tidak bisa di-geolocate
+2. **VPN/Proxy** - IP address ter-mask
+3. **API Rate Limit** - Terlalu banyak request dalam waktu singkat
+4. **CORS/Mixed Content** - Browser block HTTP request dari HTTPS site
+
+**Solusi:**
+1. **Deploy ke hosting** (Netlify, Vercel, dll) untuk test dengan IP publik
+2. **Tunggu beberapa menit** jika rate limit
+3. **Cek browser console** (F12) untuk error message
+4. Script sudah menggunakan **3 API fallback**:
+   - ip-api.com (primary)
+   - ipapi.co (backup)
+   - ipwho.is (backup)
+
+**Test Geolocation:**
+Buka Console browser (F12) dan jalankan:
+```javascript
+fetch('http://ip-api.com/json/').then(r=>r.json()).then(console.log)
+```
+
+Jika berhasil, akan tampil data lokasi Anda.
+
 ## 7. Optional: Scheduled Cleanup
 
 Untuk menghapus data lama secara otomatis, buat fungsi di Supabase:
