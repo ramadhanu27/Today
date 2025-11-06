@@ -71,6 +71,13 @@ CREATE POLICY "Allow public read" ON social_clicks
   USING (true);
 ```
 
+### Update Tabel `page_visits` (tambah session duration)
+
+```sql
+-- Add session_duration column (in seconds)
+ALTER TABLE page_visits ADD COLUMN IF NOT EXISTS session_duration INTEGER DEFAULT 0;
+```
+
 ### Buat Tabel `daily_stats` (Optional - untuk aggregasi)
 
 ```sql

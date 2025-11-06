@@ -1,24 +1,53 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/6afb98c8-7f48-4d5f-94d1-3d12329ab7cc/deploy-status)](https://app.netlify.com/projects/jiawialo/deploys)
 
-# Social Media Link Sharing Website
+# 🌟 Jia Wialo - Personal Profile & Analytics Dashboard
 
-Halaman profil modern untuk membagikan link sosial media dengan tampilan profesional, animasi interaktif, dukungan PWA, dan dark mode.
+Website profil personal modern dengan **Analytics Dashboard** lengkap untuk tracking visitor, clicks, dan statistik website. Dilengkapi dengan dark mode, multi-language support (ID/EN/中文), dan PWA capabilities.
 
-## Fitur Utama
+---
 
-- Desain modern berbasis Tailwind CSS (CDN).
-- Header profil dengan foto, nama, dan deskripsi singkat.
-- Daftar link sosial: TikTok, Instagram, Facebook, dan Email (Gmail) dengan ikon resmi (via Simple Icons).
-- Jam digital real-time.
-- Dark mode dengan preferensi yang disimpan (light/dark/system) + panel pengaturan tampilan.
-- Language switcher (ID/EN/中文) dengan penyimpanan pilihan bahasa.
-- Loader/progress bar saat halaman dimuat (aktif secara default, dapat dimatikan).
-- PWA: Service Worker + Web App Manifest untuk cache offline dasar dan prompt instal aplikasi.
-- Fokus aksesibel (focus-visible) untuk navigasi keyboard yang lebih baik.
+## 📋 Daftar Isi
 
-Catatan:
-- Statistik klik belum diimplementasikan.
-- Utilitas ripple effect dan animasi masuk (fade-up) sudah tersedia di kode, tetapi belum diaktifkan pada elemen apa pun secara default.
+- [Fitur Utama](#-fitur-utama)
+- [Analytics Dashboard](#-analytics-dashboard)
+- [Teknologi](#-teknologi)
+- [Setup & Instalasi](#-setup--instalasi)
+- [Konfigurasi Supabase](#-konfigurasi-supabase)
+- [Kustomisasi](#-kustomisasi)
+- [Deployment](#-deployment)
+- [Lisensi](#-lisensi)
+
+---
+
+## ✨ Fitur Utama
+
+### **Website Profil**
+- ✅ **Desain Modern**: Berbasis Tailwind CSS dengan gradient backgrounds
+- ✅ **Header Profil**: Foto, nama, dan deskripsi multi-bahasa
+- ✅ **Social Media Links**: TikTok, Instagram, Facebook, YouTube, Gmail dengan icon SVG asli
+- ✅ **Jam Digital**: Real-time clock dengan format 24 jam
+- ✅ **Dark Mode**: 3 mode (Light/Dark/System) dengan smooth transition
+- ✅ **Multi-Language**: Support Bahasa Indonesia, English, dan 中文 (Chinese)
+- ✅ **PWA Ready**: Installable sebagai aplikasi dengan offline support
+- ✅ **Responsive**: Optimal di mobile, tablet, dan desktop
+- ✅ **Ripple Effect**: Material Design ripple pada buttons
+- ✅ **Entrance Animations**: Fade-up animations untuk smooth UX
+
+### **Analytics Dashboard** 🎯
+- ✅ **Dual Mode Access**: 
+  - 👁️ **View Mode** (Public): Siapa saja bisa lihat analytics
+  - 👑 **Admin Mode** (Protected): Full access dengan password
+- ✅ **Real-time Statistics**: Live visitor counter (5 menit terakhir)
+- ✅ **Visitor Tracking**: Track semua kunjungan dengan detail lengkap
+- ✅ **Geolocation**: Deteksi negara dan kota visitor (dengan flag emoji)
+- ✅ **Session Duration**: Track berapa lama visitor stay di website
+- ✅ **Click Tracking**: Track klik pada social media links
+- ✅ **Charts & Visualizations**: 4 interactive charts dengan Chart.js
+- ✅ **Goals & Targets**: Set dan track daily/weekly/monthly goals
+- ✅ **Date Range Filter**: Filter data by custom date range
+- ✅ **Export to CSV**: Download analytics data
+- ✅ **Multi-Language Dashboard**: Semua text ter-translate otomatis
+- ✅ **Dark Mode Support**: Charts adjust colors based on theme
 
 ## Struktur Proyek
 

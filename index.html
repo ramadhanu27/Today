@@ -115,28 +115,84 @@
             <input type="password" id="analyticsPassword"
                 class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4"
                 placeholder="Password">
-            <div class="flex gap-2">
+            <div class="flex gap-3 mt-4">
                 <button id="cancelPassword"
-                    class="flex-1 px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    class="flex-1 px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">
                     Cancel
                 </button>
                 <button id="submitPassword"
                     class="flex-1 px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors">
-                    Submit
+                    Admin Login
                 </button>
             </div>
             <p id="passwordError" class="text-red-500 text-sm mt-2 hidden">Incorrect password</p>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button id="viewAsGuest"
+                    class="w-full px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    View as Guest (Read Only)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Goals Modal -->
+    <div id="editGoalsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Set Your Goals</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Daily Visits Goal
+                    </label>
+                    <input type="number" id="dailyGoal" placeholder="e.g., 100" 
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Weekly Visits Goal
+                    </label>
+                    <input type="number" id="weeklyGoal" placeholder="e.g., 500" 
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Monthly Visits Goal
+                    </label>
+                    <input type="number" id="monthlyGoal" placeholder="e.g., 2000" 
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button id="saveGoals" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Save Goals
+                </button>
+                <button id="cancelGoals" class="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">
+                    Cancel
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Analytics Dashboard Modal -->
     <div id="analyticsDashboard"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden overflow-y-auto">
-        <div class="min-h-screen flex items-center justify-center p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl my-8">
+        <div class="min-h-screen flex items-start sm:items-center justify-center p-2 sm:p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-6xl my-2 sm:my-8">
                 <!-- Header -->
-                <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Analytics Dashboard</h2>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Analytics Dashboard</h2>
+                        <span id="modeIndicator" class="hidden px-2 sm:px-3 py-1 rounded-full text-xs font-semibold"></span>
+                    </div>
                     <button id="closeDashboard"
                         class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,97 +202,144 @@
                     </button>
                 </div>
 
+                <!-- Date Range Filter -->
+                <div class="p-3 sm:p-6 pb-0">
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                        <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
+                            <label id="timeRangeLabel" class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Time Range:</label>
+                            <select id="dateRangeFilter" class="flex-1 sm:flex-none px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="today" data-i18n="today">Today</option>
+                                <option value="yesterday" data-i18n="yesterday">Yesterday</option>
+                                <option value="7days" selected data-i18n="last7days">Last 7 Days</option>
+                                <option value="30days" data-i18n="last30days">Last 30 Days</option>
+                                <option value="90days" data-i18n="last90days">Last 90 Days</option>
+                                <option value="thisMonth" data-i18n="thisMonth">This Month</option>
+                                <option value="lastMonth" data-i18n="lastMonth">Last Month</option>
+                                <option value="all" data-i18n="allTime">All Time</option>
+                                <option value="custom" data-i18n="customRange">Custom Range</option>
+                            </select>
+                            <div id="customDateInputs" class="hidden w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                <input type="date" id="startDate" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">to</span>
+                                <input type="date" id="endDate" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <button id="applyCustomDate" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs sm:text-sm font-medium">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Stats Cards -->
-                <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8"></div>
-                        <p class="text-sm opacity-90 flex items-center gap-1">
+                <div class="p-3 sm:p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
+                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-white opacity-10 rounded-full -mr-6 sm:-mr-8 -mt-6 sm:-mt-8"></div>
+                        <p class="text-xs sm:text-sm opacity-90 flex items-center gap-1">
                             <span class="animate-pulse">●</span> Live Now
                         </p>
-                        <p class="text-3xl font-bold mt-1" id="liveVisitors">0</p>
+                        <p class="text-xl sm:text-3xl font-bold mt-1" id="liveVisitors">0</p>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white shadow-lg">
-                        <p class="text-sm opacity-90">Today's Visits</p>
-                        <p class="text-3xl font-bold mt-1" id="todayVisits">0</p>
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white shadow-lg">
+                        <p class="text-xs sm:text-sm opacity-90">Today's Visits</p>
+                        <p class="text-xl sm:text-3xl font-bold mt-1" id="todayVisits">0</p>
                     </div>
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white shadow-lg">
-                        <p class="text-sm opacity-90">This Week</p>
-                        <p class="text-3xl font-bold mt-1" id="weekVisits">0</p>
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white shadow-lg">
+                        <p class="text-xs sm:text-sm opacity-90">This Week</p>
+                        <p class="text-xl sm:text-3xl font-bold mt-1" id="weekVisits">0</p>
                     </div>
-                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
-                        <p class="text-sm opacity-90">This Month</p>
-                        <p class="text-3xl font-bold mt-1" id="monthVisits">0</p>
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white shadow-lg">
+                        <p class="text-xs sm:text-sm opacity-90">This Month</p>
+                        <p class="text-xl sm:text-3xl font-bold mt-1" id="monthVisits">0</p>
                     </div>
-                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white shadow-lg">
-                        <p class="text-sm opacity-90">Total Visits</p>
-                        <p class="text-3xl font-bold mt-1" id="totalVisits">0</p>
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white shadow-lg">
+                        <p class="text-xs sm:text-sm opacity-90">Total Visits</p>
+                        <p class="text-xl sm:text-3xl font-bold mt-1" id="totalVisits">0</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white shadow-lg">
+                        <p class="text-xs sm:text-sm opacity-90">Avg. Session</p>
+                        <p class="text-xl sm:text-3xl font-bold mt-1" id="avgSession">0s</p>
+                    </div>
+                </div>
+
+                <!-- Goals Section -->
+                <div class="p-3 sm:p-6 pt-0">
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 sm:mb-4">
+                            <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">Goals & Targets</h3>
+                            <button id="editGoals" class="text-xs sm:text-sm text-purple-600 dark:text-purple-400 hover:underline">
+                                Edit Goals
+                            </button>
+                        </div>
+                        <div id="goalsContainer" class="space-y-3 sm:space-y-4">
+                            <!-- Goals will be rendered here -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- Charts Grid -->
-                <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
                     <!-- Last 7 Days Trend -->
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Last 7 Days Trend</h3>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800 dark:text-white mb-3 sm:mb-4">Last 7 Days Trend</h3>
                         <canvas id="visitsChart" class="w-full" height="120"></canvas>
                     </div>
                     
                     <!-- Hourly Traffic -->
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Today's Hourly Traffic</h3>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800 dark:text-white mb-3 sm:mb-4">Today's Hourly Traffic</h3>
                         <canvas id="hourlyChart" class="w-full" height="120"></canvas>
                     </div>
                     
                     <!-- Traffic Sources -->
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Traffic Sources</h3>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800 dark:text-white mb-3 sm:mb-4">Traffic Sources</h3>
                         <canvas id="sourcesChart" class="w-full" height="120"></canvas>
                     </div>
                     
                     <!-- Device Breakdown -->
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Device Breakdown</h3>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                        <h3 class="text-sm sm:text-lg font-semibold text-gray-800 dark:text-white mb-3 sm:mb-4">Device Breakdown</h3>
                         <canvas id="deviceChart" class="w-full" height="120"></canvas>
                     </div>
                 </div>
 
                 <!-- Social Media Clicks -->
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Social Media Clicks</h3>
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-                        <div id="socialClicksList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <p class="text-gray-500 dark:text-gray-400 text-center py-4 col-span-2">Loading...</p>
+                <div class="p-3 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white mb-3 sm:mb-4">Social Media Clicks</h3>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                        <div id="socialClicksList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+                            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center py-4 col-span-full">Loading...</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Top Countries -->
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Top Countries</h3>
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
-                        <div id="topCountriesList" class="space-y-3">
-                            <p class="text-gray-500 dark:text-gray-400 text-center py-4">Loading...</p>
+                <div class="p-3 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white mb-3 sm:mb-4">Top Countries</h3>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                        <div id="topCountriesList" class="space-y-2 sm:space-y-3">
+                            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center py-4">Loading...</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Recent Visits Table -->
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Recent Visits</h3>
-                    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden">
+                <div class="p-3 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white mb-3 sm:mb-4">Recent Visits</h3>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl overflow-hidden">
                         <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
+                            <table class="w-full text-xs sm:text-sm">
                                 <thead class="bg-gray-200 dark:bg-gray-800">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-gray-700 dark:text-gray-300">Date & Time</th>
-                                        <th class="px-4 py-3 text-left text-gray-700 dark:text-gray-300">Location</th>
-                                        <th class="px-4 py-3 text-left text-gray-700 dark:text-gray-300">Referrer</th>
-                                        <th class="px-4 py-3 text-left text-gray-700 dark:text-gray-300">Device</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-gray-700 dark:text-gray-300 whitespace-nowrap">Date & Time</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-gray-700 dark:text-gray-300 whitespace-nowrap">Location</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-gray-700 dark:text-gray-300 hidden sm:table-cell">Referrer</th>
+                                        <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-gray-700 dark:text-gray-300 whitespace-nowrap">Device</th>
                                     </tr>
                                 </thead>
                                 <tbody id="recentVisitsTable" class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr>
-                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                        <td colspan="4" class="px-2 sm:px-4 py-6 sm:py-8 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                             Loading...
                                         </td>
                                     </tr>
@@ -247,24 +350,26 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+                <div class="p-3 sm:p-6 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <button id="exportCSV"
-                        class="flex-1 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 active:bg-green-800 transition-colors flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                             </path>
                         </svg>
-                        Export CSV
+                        <span class="hidden sm:inline">Export CSV</span>
+                        <span class="sm:hidden">Export</span>
                     </button>
                     <button id="refreshAnalytics"
-                        class="flex-1 px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 transition-colors flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                             </path>
                         </svg>
-                        Refresh Data
+                        <span class="hidden sm:inline">Refresh Data</span>
+                        <span class="sm:hidden">Refresh</span>
                     </button>
                 </div>
             </div>
